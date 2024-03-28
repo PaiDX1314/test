@@ -1,0 +1,112 @@
+name: IPTV
+
+on:
+  schedule:
+    - cron: '30 0/4, * * *'
+  push:
+    branches:
+      - main
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  Update:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: GetTime
+      run: echo "DATE=$(date +'%Y-%m-%d %H:%M:%S CST')" >> $GITHUB_ENV
+    - name: Update
+      run: |
+        # 央视源V6
+        rm -f CCTVV6.m3u && wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CCTVV6.m3u
+        sed -i -n '/•央视「IPV6」/,+1p' CCTVV6.m3u
+        sed -i '1i #EXTM3U' CCTVV6.m3u
+        sed -i '/^\s*$/d' CCTVV6.m3u
+        # 卫视源V6
+        rm -f CNTVV6.m3u && touch CNTVV6.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV61.m3u && sed -i -n '/•卫视「IPV6」/,+1p' CNTVV61.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV62.m3u && sed -i -n '/•4K「IPV6」/,+1p' CNTVV62.m3u        
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV63.m3u && sed -i -n '/•数字「IPV6」/,+1p' CNTVV63.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV64.m3u && sed -i -n '/•咪咕「IPV6」/,+1p' CNTVV64.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV65.m3u && sed -i -n '/•MTV/,+1p' CNTVV65.m3u
+        cat CNTVV61.m3u >> CNTVV6.m3u
+        cat CNTVV62.m3u >> CNTVV6.m3u
+        cat CNTVV63.m3u >> CNTVV6.m3u
+        cat CNTVV64.m3u >> CNTVV6.m3u
+        cat CNTVV65.m3u >> CNTVV6.m3u
+        sed -i '1i #EXTM3U' CNTVV6.m3u
+        sed -i '/^\s*$/d' CNTVV6.m3u
+        
+        # 整合源V6
+        rm -f IPV6.m3u && touch IPV6.m3u
+        cat CCTVV6.m3u >> IPV6.m3u
+        cat CNTVV6.m3u >> IPV6.m3u
+        rm -f CCTVV6.m3u CNTVV6.m3u CNTVV61.m3u CNTVV62.m3u CNTVV63.m3u CNTVV64.m3u CNTVV65.m3u
+        sed -i '/#EXTM3U/d' IPV6.m3u
+        sed -i '1i #EXTM3U' IPV6.m3u
+        sed -i '/^\s*$/d' IPV6.m3u
+        
+        # 央视源V4
+        rm -f CCTVV4.m3u && wget https://raw.githubusercontent.com/PaiDX1314/0/main/iptvlist.m3u -O CCTVV4.m3u
+        sed -i -n '/央视频道/,+1p' CCTVV4.m3u
+        sed -i '1i #EXTM3U' CCTVV4.m3u
+        sed -i '/^\s*$/d' CCTVV4.m3u
+        # 卫视源V4
+        rm -f CNTVV4.m3u && touch CNTVV4.m3u
+        wget https://raw.githubusercontent.com/PaiDX1314/0/main/iptvlist.m3u -O CNTVV41.m3u && sed -i -n '/卫视频道/,+1p' CNTVV41.m3u
+        wget https://raw.githubusercontent.com/PaiDX1314/0/main/iptvlist.m3u -O CNTVV42.m3u && sed -i -n '/其他频道/,+1p' CNTVV42.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV43.m3u && sed -i -n '/•港澳台「P」/,+1p' CNTVV43.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV44.m3u && sed -i -n '/•YouTube「P」/,+1p' CNTVV44.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV45.m3u && sed -i -n '/•MTV/,+1p' CNTVV45.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Gather.m3u -O CNTVV46.m3u && sed -i -n '/•动物世界/,+1p' CNTVV46.m3u        
+        cat CNTVV41.m3u >> CNTVV4.m3u
+        cat CNTVV42.m3u >> CNTVV4.m3u
+        cat CNTVV43.m3u >> CNTVV4.m3u
+        cat CNTVV44.m3u >> CNTVV4.m3u
+        cat CNTVV45.m3u >> CNTVV4.m3u
+        sed -i '1i #EXTM3U' CNTVV4.m3u
+        sed -i '/^\s*$/d' CNTVV4.m3u
+        # 成人源
+        rm -f Adult.m3u && touch Adult.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Adult.m3u -O Adult1.m3u && sed -i -n '/玩偶/,+1p' Adult1.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Adult.m3u -O Adult2.m3u && sed -i -n '/兔子先生/,+1p' Adult2.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Adult.m3u -O Adult3.m3u && sed -i -n '/麻豆-MSD/,+1p' Adult3.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Adult.m3u -O Adult4.m3u && sed -i -n '/麻豆-探花/,+1p' Adult4.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Adult.m3u -O Adult5.m3u && sed -i -n '/香港/,+1p' Adult5.m3u
+        wget https://raw.githubusercontent.com/YanG-1989/m3u/main/Adult.m3u -O Adult6.m3u && sed -i -n '/日本/,+1p' Adult6.m3u        
+        cat Adult1.m3u >> Adult.m3u
+        cat Adult2.m3u >> Adult.m3u
+        cat Adult3.m3u >> Adult.m3u
+        cat Adult4.m3u >> Adult.m3u
+        cat Adult5.m3u >> Adult.m3u
+        cat Adult6.m3u >> Adult.m3u
+        rm -f Adult1.m3u Adult2.m3u Adult3.m3u Adult4.m3u Adult5.m3u Adult6.m3u
+        sed -i '1i #EXTM3U' Adult.m3u
+        sed -i '/^\s*$/d' Adult.m3u
+        
+        # 整合源V4
+        rm -f IPV4.m3u && touch IPV4.m3u
+        cat CCTVV4.m3u >> IPV4.m3u
+        cat CNTVV4.m3u >> IPV4.m3u
+        rm -f CCTVV4.m3u CNTVV4.m3u CNTVV41.m3u CNTVV42.m3u CNTVV43.m3u CNTVV44.m3u CNTVV45.m3u CNTVV46.m3u
+        sed -i '/#EXTM3U/d' IPV4.m3u
+        sed -i '1i #EXTM3U' IPV4.m3u
+        sed -i '/^\s*$/d' IPV4.m3u
+        
+        # 节目源
+        rm -f EPG.xml && wget http://epg.51zmt.top:8000/e.xml -O EPG.xml
+        echo "Auto Update IPTV in $DATE 复制以下链接可直接使用 https://raw.githubusercontent.com/PaiDX1314/TV/main/IPV4.m3u https://raw.githubusercontent.com/PaiDX1314/TV/main/IPV6.m3u" > README.md
+    - name: Clean
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git checkout --orphan latest_branch
+        git add -A
+        git commit -am "$DATE"
+        git branch -D main
+        git branch -m main
+    - name: Push
+      run: git push -f origin main
